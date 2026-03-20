@@ -7,44 +7,83 @@ export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const hash = await bcrypt.hash(password, 10);
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Faltan campos requeridos" });
+    }
 
-    let imageData = {};
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "El email ya está registrado" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    let image = { url: "", public_id: "" };
 
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path);
-      imageData = {
-        image: result.secure_url,
-        public_id: result.public_id
-      };
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: "users"
+      });
+      image = { url: uploadResult.secure_url, public_id: uploadResult.public_id };
     }
 
     const user = await User.create({
       username,
       email,
-      password: hash,
-      ...imageData
+      password: hashed,
+      image,
+      role: "user"
     });
 
-    res.json(user);
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "7d"
+    });
+
+    res.status(201).json({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        image: user.image
+      },
+      token
+    });
   } catch (error) {
-    res.status(500).json(error);
+    console.error(error);
+    res.status(500).json({ message: "Error al registrar usuario" });
   }
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email y contraseña son requeridos" });
+    }
 
-  const match = await bcrypt.compare(password, user.password);
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: "Credenciales inválidas" });
 
-  if (!match) return res.status(400).json({ message: "Error" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ message: "Credenciales inválidas" });
 
-  const token = jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET
-  );
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "7d"
+    });
 
-  res.json({ token });
+    res.json({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        image: user.image
+      },
+      token
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error en login" });
+  }
 };
