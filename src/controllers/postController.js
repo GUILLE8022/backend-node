@@ -1,15 +1,16 @@
 import { Post } from "../models/Post.js";
 import { User } from "../models/User.js";
 
-
 export const createPost = async (req, res) => {
   try {
     const { title, content } = req.body;
+
     if (!title || !content) {
       return res.status(400).json({ message: "Title y content son requeridos" });
     }
 
     const post = await Post.create({ title, content });
+
     await User.findByIdAndUpdate(req.user.id, {
       $addToSet: { posts: post._id }
     });
@@ -35,6 +36,7 @@ export const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post no encontrado" });
+
     res.json(post);
   } catch (error) {
     console.error(error);
@@ -52,6 +54,7 @@ export const updatePost = async (req, res) => {
 
     if (title) post.title = title;
     if (content) post.content = content;
+
     await post.save();
 
     res.json({ message: "Post actualizado", post });
@@ -66,7 +69,12 @@ export const deletePost = async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post no encontrado" });
 
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: { posts: post._id }
+    });
+
     await post.deleteOne();
+
     res.json({ message: "Post eliminado" });
   } catch (error) {
     console.error(error);

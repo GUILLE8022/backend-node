@@ -1,165 +1,212 @@
-# Backend Node.js - API REST con Express y MongoDB
+# 🚀 Backend Node.js - API REST con Express y MongoDB
 
-## Descripción
+---
 
-Este proyecto es una API REST desarrollada con Node.js, Express y MongoDB Atlas. Proporciona funcionalidades completas de autenticación, gestión de usuarios y posts, con integración de Cloudinary para el manejo de imágenes. Incluye roles de usuario (user y admin) con permisos diferenciados, y utiliza JWT para la autenticación segura.
+## 📌 Descripción
 
-## Tecnologías Utilizadas
+Este proyecto es una API REST desarrollada con Node.js y Express, conectada a una base de datos MongoDB Atlas.
 
-- **Node.js**: Entorno de ejecución de JavaScript del lado del servidor.
-- **Express.js**: Framework web para Node.js.
-- **MongoDB Atlas**: Base de datos NoSQL en la nube.
-- **Mongoose**: ODM para MongoDB.
-- **JWT (JSON Web Tokens)**: Para autenticación.
-- **bcrypt**: Para encriptación de contraseñas.
-- **Cloudinary**: Servicio de gestión de imágenes en la nube.
-- **Multer**: Middleware para manejo de archivos multipart/form-data.
-- **CORS**: Para permitir solicitudes desde diferentes orígenes.
-- **dotenv**: Para manejo de variables de entorno.
+La API permite:
 
-## Instalación
+* Registro y autenticación de usuarios mediante JWT
+* Gestión de usuarios con roles (user / admin)
+* CRUD completo de posts
+* Relación entre usuarios y posts
+* Subida y eliminación de imágenes con Cloudinary
 
-Sigue estos pasos para configurar el proyecto en tu entorno local:
+---
 
-1. **Clona el repositorio:**
-   ```bash
-   git clone https://github.com/Beltran18/backend-nodejs.git
-   cd backend-nodejs
-   ```
+## 🛠 Tecnologías Utilizadas
 
-2. **Instala las dependencias:**
-   ```bash
-   npm install
-   ```
+* Node.js
+* Express.js
+* MongoDB Atlas
+* Mongoose
+* JWT (JSON Web Tokens)
+* bcrypt
+* Cloudinary
+* Multer
+* CORS
+* dotenv
 
-3. **Configura las variables de entorno:**
-   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
-   ```env
-   PORT=3000
-   JWT_SECRET=tu_clave_secreta_para_jwt
-   DB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/nombre_db
-   CLOUDINARY_CLOUD_NAME=tu_cloud_name
-   CLOUDINARY_API_KEY=tu_api_key
-   CLOUDINARY_API_SECRET=tu_api_secret
-   SEED=false
-   ```
+---
 
-4. **Ejecuta el proyecto:**
-   ```bash
-   npm run dev
-   ```
+## ⚙️ Instalación
 
-   El servidor se iniciará en `http://localhost:3000`.
+### 1. Clonar el repositorio
 
-## Variables de Entorno
-
-- `PORT`: Puerto en el que se ejecuta el servidor (por defecto 3000).
-- `JWT_SECRET`: Clave secreta para firmar los tokens JWT.
-- `DB_URI`: URI de conexión a MongoDB Atlas.
-- `CLOUDINARY_CLOUD_NAME`: Nombre de la nube en Cloudinary.
-- `CLOUDINARY_API_KEY`: Clave API de Cloudinary.
-- `CLOUDINARY_API_SECRET`: Clave secreta API de Cloudinary.
-- `SEED`: Booleano para ejecutar el seed de datos al iniciar (true/false).
-
-## Autenticación (JWT)
-
-La API utiliza JSON Web Tokens (JWT) para la autenticación. Para acceder a rutas protegidas, incluye el token en el header de la solicitud:
-
-```
-Authorization: Bearer <tu_token_jwt>
+```bash
+git clone https://github.com/Beltran18/backend-nodejs.git
+cd backend-nodejs
 ```
 
-Los tokens se obtienen al hacer login exitosamente.
+### 2. Instalar dependencias
 
-## Endpoints
+```bash
+npm install
+```
 
-### Auth
+### 3. Configurar variables de entorno
 
-- **POST /api/auth/register**
-  - Descripción: Registra un nuevo usuario.
-  - Body: `username`, `email`, `password`, `image` (opcional, archivo).
-  - Respuesta: Usuario creado.
+Crear un archivo `.env` en la raíz:
 
-- **POST /api/auth/login**
-  - Descripción: Inicia sesión.
-  - Body: `email`, `password`.
-  - Respuesta: Token JWT.
+```env
+PORT=3000
+MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/backend
+JWT_SECRET=tu_clave_secreta
+CLOUD_NAME=tu_cloud_name
+API_KEY=tu_api_key
+API_SECRET=tu_api_secret
+SEED=false
+```
 
-### Users
+### 4. Ejecutar el proyecto
 
-- **GET /api/users**
-  - Descripción: Obtiene todos los usuarios (requiere autenticación).
-  - Respuesta: Lista de usuarios con sus posts.
+```bash
+npm run dev
+```
 
-- **GET /api/users/:id**
-  - Descripción: Obtiene un usuario por ID (requiere autenticación).
-  - Parámetros: `id` (ID del usuario).
-  - Respuesta: Detalles del usuario.
+Servidor disponible en:
 
-- **PUT /api/users/:id**
-  - Descripción: Actualiza un usuario (solo el propio usuario o admin).
-  - Parámetros: `id` (ID del usuario).
-  - Body: `username`, `email`, `password`, `image` (opcional).
-  - Respuesta: Usuario actualizado.
+```
+http://localhost:3000
+```
 
-- **DELETE /api/users/:id**
-  - Descripción: Elimina un usuario (solo el propio usuario o admin).
-  - Parámetros: `id` (ID del usuario).
-  - Respuesta: Confirmación de eliminación.
+---
 
-- **PUT /api/users/role/:id**
-  - Descripción: Cambia el rol de un usuario (solo admin).
-  - Parámetros: `id` (ID del usuario).
-  - Body: `role` (nuevo rol: "user" o "admin").
-  - Respuesta: Usuario con rol actualizado.
+## 🔐 Autenticación
 
-### Posts
+La API utiliza JWT.
 
-- **POST /api/post**
-  - Descripción: Crea un nuevo post (requiere autenticación).
-  - Body: `title`, `content`.
-  - Respuesta: Post creado.
+Enviar el token en cada petición protegida:
 
-- **GET /api/post**
-  - Descripción: Obtiene todos los posts.
-  - Respuesta: Lista de posts.
+```
+Authorization: Bearer TU_TOKEN
+```
 
-- **GET /api/post/:id**
-  - Descripción: Obtiene un post por ID.
-  - Parámetros: `id` (ID del post).
-  - Respuesta: Detalles del post.
+---
 
-- **PUT /api/post/:id**
-  - Descripción: Actualiza un post (requiere autenticación).
-  - Parámetros: `id` (ID del post).
-  - Body: `title`, `content`.
-  - Respuesta: Post actualizado.
+## 📡 Endpoints
 
-- **DELETE /api/post/:id**
-  - Descripción: Elimina un post (requiere autenticación).
-  - Parámetros: `id` (ID del post).
-  - Respuesta: Confirmación de eliminación.
+### 🔑 Auth
 
-## Roles y Permisos
+| Método | Endpoint           | Descripción       | Body                      |
+| ------ | ------------------ | ----------------- | ------------------------- |
+| POST   | /api/auth/register | Registrar usuario | username, email, password |
+| POST   | /api/auth/login    | Iniciar sesión    | email, password           |
 
-- **User (por defecto)**: Puede crear, leer, actualizar y eliminar sus propios posts. Solo puede editar/eliminar su propia cuenta.
-- **Admin**: Tiene todos los permisos de user, además puede eliminar cualquier usuario y cambiar roles de usuarios.
+---
 
-Los permisos se verifican mediante middlewares de autenticación y autorización.
+### 👤 Users
 
-## Uso de Cloudinary
+| Método | Endpoint            | Descripción              | Auth |
+| ------ | ------------------- | ------------------------ | ---- |
+| GET    | /api/users          | Listar usuarios          | ✅    |
+| GET    | /api/users/:id      | Obtener usuario por ID   | ✅    |
+| PUT    | /api/users/:id      | Actualizar usuario       | ✅    |
+| DELETE | /api/users/:id      | Eliminar usuario         | ✅    |
+| PUT    | /api/users/role/:id | Cambiar rol (solo admin) | ✅    |
 
-Cloudinary se utiliza para almacenar y gestionar imágenes de perfil de usuarios. Al registrar o actualizar un usuario con una imagen, esta se sube automáticamente a Cloudinary. Al eliminar un usuario, su imagen se elimina de Cloudinary para liberar espacio.
+---
 
-## Seed de Datos
+### 📝 Posts
 
-El proyecto incluye un seed para insertar datos de ejemplo en la colección de posts. Para ejecutarlo, establece `SEED=true` en el archivo `.env` y reinicia el servidor. Esto eliminará todos los posts existentes e insertará 3 posts de ejemplo.
+| Método | Endpoint      | Descripción     | Auth |
+| ------ | ------------- | --------------- | ---- |
+| POST   | /api/post     | Crear post      | ✅    |
+| GET    | /api/post     | Listar posts    | ❌    |
+| GET    | /api/post/:id | Obtener post    | ❌    |
+| PUT    | /api/post/:id | Actualizar post | ✅    |
+| DELETE | /api/post/:id | Eliminar post   | ✅    |
 
-## Notas Importantes
+---
 
-- La relación entre usuarios y posts se maneja mediante un array de referencias en el modelo User, utilizando `$addToSet` para evitar duplicados.
-- Las contraseñas se encriptan con bcrypt antes de almacenarse.
-- Los tokens JWT tienen una expiración implícita (configurable en el código si es necesario).
-- Asegúrate de configurar correctamente las credenciales de MongoDB Atlas y Cloudinary para el funcionamiento completo.
-- El proyecto utiliza ES6 modules, por lo que requiere Node.js 14+.
-- Para desarrollo, se utiliza Nodemon para reinicio automático del servidor.
+## 👥 Roles y Permisos
+
+### User
+
+* Crear posts
+* Editar y eliminar sus propios posts
+* Eliminar su propia cuenta
+
+### Admin
+
+* Todos los permisos de user
+* Eliminar cualquier usuario
+* Cambiar roles de usuarios
+
+---
+
+## 🔗 Relación entre Modelos
+
+* Un usuario tiene un array de posts
+* Se utiliza `$addToSet` para evitar duplicados
+* Al eliminar un post, también se elimina su referencia en el usuario
+
+---
+
+## ☁️ Cloudinary
+
+* Permite subir imágenes de perfil
+* Las imágenes se almacenan en la nube
+* Al eliminar un usuario, su imagen también se elimina automáticamente
+
+---
+
+## 🌱 Seed de Datos
+
+Para ejecutar la semilla:
+
+```bash
+npm run seed
+```
+
+O activar en `.env`:
+
+```env
+SEED=true
+```
+
+---
+
+## 🧪 Pruebas
+
+Puedes probar la API usando:
+
+* Postman
+* Insomnia
+
+Flujo recomendado:
+
+1. Registrar usuario
+2. Login → obtener token
+3. Usar token en endpoints protegidos
+4. Crear, actualizar y eliminar posts
+
+---
+
+## ⚠️ Notas Técnicas
+
+* Se usa `$addToSet` para evitar duplicados en el array de posts
+* Se usa `$pull` para eliminar referencias al borrar un post
+* Contraseñas encriptadas con bcrypt
+* Autenticación mediante JWT
+* Middleware `auth` protege rutas privadas
+* Middleware `isAdmin` controla permisos de administrador
+* Proyecto configurado con ES Modules (`"type": "module"`)
+
+---
+
+## 📌 Estado del Proyecto
+
+✔ CRUD completo de usuarios y posts
+✔ Autenticación JWT funcional
+✔ Roles implementados correctamente
+✔ Relación entre modelos funcional
+✔ Subida de imágenes con Cloudinary
+✔ Eliminación de archivos en Cloudinary
+✔ Seed de datos implementado
+✔ Documentación completa
+
+---
+

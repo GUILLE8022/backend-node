@@ -1,22 +1,12 @@
 {
   "name": "backend-nodejs",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "seed": "node src/seeds/postSeed.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Beltran18/backend-nodejs.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Beltran18/backend-nodejs/issues"
-  },
-  "homepage": "https://github.com/Beltran18/backend-nodejs#readme",
-  "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.9.0",
