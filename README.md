@@ -12,6 +12,7 @@ La API permite:
 * Gestión de usuarios con roles (user / admin)
 * CRUD completo de posts
 * Relación entre usuarios y posts
+* Validación de autoría de posts (seguridad)
 * Subida y eliminación de imágenes con Cloudinary
 
 ---
@@ -40,27 +41,52 @@ git clone https://github.com/Beltran18/backend-nodejs.git
 cd backend-nodejs
 ```
 
+---
+
 ### 2. Instalar dependencias
 
 ```bash
 npm install
 ```
 
+---
+
 ### 3. Configurar variables de entorno
 
-Crear un archivo `.env` en la raíz:
+Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 PORT=3000
-MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/backend
+MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/backend?retryWrites=true&w=majority
 JWT_SECRET=tu_clave_secreta
+
 CLOUD_NAME=tu_cloud_name
 API_KEY=tu_api_key
 API_SECRET=tu_api_secret
+
 SEED=false
 ```
 
-### 4. Ejecutar el proyecto
+⚠️ Importante:
+
+* Las variables deben coincidir EXACTAMENTE con las usadas en el código
+* No subas tu `.env` real a GitHub
+
+---
+
+### 4. Configurar MongoDB Atlas
+
+En **Network Access → IP Access List**, debes agregar:
+
+```
+0.0.0.0/0
+```
+
+✔ Esto permite acceso desde cualquier IP (requerido para despliegue)
+
+---
+
+### 5. Ejecutar el proyecto
 
 ```bash
 npm run dev
@@ -76,9 +102,9 @@ http://localhost:3000
 
 ## 🔐 Autenticación
 
-La API utiliza JWT.
+La API utiliza JSON Web Tokens (JWT).
 
-Enviar el token en cada petición protegida:
+Para acceder a rutas protegidas, enviar el token en el header:
 
 ```
 Authorization: Bearer TU_TOKEN
@@ -87,6 +113,8 @@ Authorization: Bearer TU_TOKEN
 ---
 
 ## 📡 Endpoints
+
+---
 
 ### 🔑 Auth
 
@@ -102,7 +130,7 @@ Authorization: Bearer TU_TOKEN
 | Método | Endpoint            | Descripción              | Auth |
 | ------ | ------------------- | ------------------------ | ---- |
 | GET    | /api/users          | Listar usuarios          | ✅    |
-| GET    | /api/users/:id      | Obtener usuario por ID   | ✅    |
+| GET    | /api/users/:id      | Obtener usuario          | ✅    |
 | PUT    | /api/users/:id      | Actualizar usuario       | ✅    |
 | DELETE | /api/users/:id      | Eliminar usuario         | ✅    |
 | PUT    | /api/users/role/:id | Cambiar rol (solo admin) | ✅    |
@@ -126,7 +154,7 @@ Authorization: Bearer TU_TOKEN
 ### User
 
 * Crear posts
-* Editar y eliminar sus propios posts
+* Editar y eliminar **solo sus propios posts**
 * Eliminar su propia cuenta
 
 ### Admin
@@ -140,32 +168,47 @@ Authorization: Bearer TU_TOKEN
 ## 🔗 Relación entre Modelos
 
 * Un usuario tiene un array de posts
+* Cada post tiene un campo `author` (ID del usuario)
 * Se utiliza `$addToSet` para evitar duplicados
-* Al eliminar un post, también se elimina su referencia en el usuario
+* Se utiliza `$pull` para eliminar referencias al borrar un post
+
+---
+
+## 🔒 Seguridad Implementada
+
+✔ Validación de autoría de posts:
+
+* Un usuario NO puede editar/eliminar posts de otros
+* Un admin SÍ puede hacerlo
+
+✔ Middleware utilizados:
+
+* `auth` → protege rutas privadas
+* `isAdmin` → restringe acceso a administradores
 
 ---
 
 ## ☁️ Cloudinary
 
-* Permite subir imágenes de perfil
-* Las imágenes se almacenan en la nube
-* Al eliminar un usuario, su imagen también se elimina automáticamente
+* Las imágenes se suben directamente a la nube
+* No se almacenan en el servidor local
+* Al eliminar un usuario, su imagen también se elimina
 
 ---
 
 ## 🌱 Seed de Datos
 
-Para ejecutar la semilla:
+Ejecutar:
 
 ```bash
 npm run seed
 ```
 
-O activar en `.env`:
+✔ El seed:
 
-```env
-SEED=true
-```
+* Se conecta a la base de datos
+* Inserta datos automáticamente
+* Funciona como script independiente
 
 ---
 
@@ -176,24 +219,26 @@ Puedes probar la API usando:
 * Postman
 * Insomnia
 
-Flujo recomendado:
+### Flujo recomendado:
 
 1. Registrar usuario
 2. Login → obtener token
 3. Usar token en endpoints protegidos
-4. Crear, actualizar y eliminar posts
+4. Crear post
+5. Editar post (solo propio)
+6. Eliminar post
 
 ---
 
 ## ⚠️ Notas Técnicas
 
-* Se usa `$addToSet` para evitar duplicados en el array de posts
-* Se usa `$pull` para eliminar referencias al borrar un post
 * Contraseñas encriptadas con bcrypt
 * Autenticación mediante JWT
-* Middleware `auth` protege rutas privadas
-* Middleware `isAdmin` controla permisos de administrador
+* Se usa `$addToSet` para evitar duplicados
+* Se usa `$pull` para eliminar referencias
+* Middleware reutilizables implementados correctamente
 * Proyecto configurado con ES Modules (`"type": "module"`)
+* No se mezcla CommonJS con ES Modules
 
 ---
 
@@ -202,11 +247,11 @@ Flujo recomendado:
 ✔ CRUD completo de usuarios y posts
 ✔ Autenticación JWT funcional
 ✔ Roles implementados correctamente
-✔ Relación entre modelos funcional
+✔ Seguridad en endpoints
+✔ Relación entre modelos correcta
 ✔ Subida de imágenes con Cloudinary
-✔ Eliminación de archivos en Cloudinary
-✔ Seed de datos implementado
+✔ Eliminación de imágenes en Cloudinary
+✔ Seed funcional
 ✔ Documentación completa
 
 ---
-
